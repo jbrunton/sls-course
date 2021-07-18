@@ -1,23 +1,11 @@
-import AWS from 'aws-sdk';
 import httpMiddleware from '../middlewares/http';
 import errors from 'http-errors';
-
-const db = new AWS.DynamoDB.DocumentClient();
+import { getAuctionById } from '../controllers/auctions';
 
 async function getAuction(event, context) {
   const { id } = event.pathParameters;
   try {
-    const result = await db.get({
-      TableName: process.env.AUCTIONS_TABLE_NAME,
-      Key: { id }
-    }).promise();
-
-    const auction = result.Item;
-
-    if (!auction) {
-      throw new errors.NotFound(`Auction with ID ${id} not found`);
-    }
-
+    const auction = await getAuctionById(id);
     return {
       statusCode: 200,
       body: JSON.stringify({ auction }),

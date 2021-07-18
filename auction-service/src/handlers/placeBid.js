@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import httpMiddleware from '../middlewares/http';
 import errors from 'http-errors';
+import { getAuctionById } from '../controllers/auctions';
 
 const db = new AWS.DynamoDB.DocumentClient();
 
@@ -19,13 +20,18 @@ async function placeBid(event, context) {
   };
 
   try {
-    const result = await db.update(params).promise();
+    const auction = await getAuctionById(id);
+    const highestBid = auction.highestBid.amount;
 
-    const auction = result.Attributes;
+    if (amount <= highestBid) {
+      throw new errors.Forbidden(`Your bid must be higher than ${highestBid}`);
+    }
+
+    const result = await db.update(params).promise();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ auction }),
+      body: JSON.stringify({ auction: result.Attributes }),
     };
   } catch (e) {
     if (errors.isHttpError(e)) {

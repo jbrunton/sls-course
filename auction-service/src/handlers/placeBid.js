@@ -19,28 +19,19 @@ async function placeBid(event, context) {
     ReturnValues: 'ALL_NEW',
   };
 
-  try {
-    const auction = await getAuctionById(id);
-    const highestBid = auction.highestBid.amount;
+  const auction = await getAuctionById(id);
+  const highestBid = auction.highestBid.amount;
 
-    if (amount <= highestBid) {
-      throw new errors.Forbidden(`Your bid must be higher than ${highestBid}`);
-    }
-
-    const result = await db.update(params).promise();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ auction: result.Attributes }),
-    };
-  } catch (e) {
-    if (errors.isHttpError(e)) {
-      throw e;
-    } else {
-      console.error(e);
-      throw new errors.InternalServerError(e);
-    }
+  if (amount <= highestBid) {
+    throw new errors.Forbidden(`Your bid must be higher than ${highestBid}`);
   }
+
+  const result = await db.update(params).promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ auction: result.Attributes }),
+  };
 }
 
 export const handler = httpMiddleware(placeBid);

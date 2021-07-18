@@ -2,8 +2,25 @@ import AWS from 'aws-sdk';
 import httpMiddleware from '../middlewares/http';
 import errors from 'http-errors';
 import { getAuctionById } from '../controllers/auctions';
+import validator from '@middy/validator';
 
 const db = new AWS.DynamoDB.DocumentClient();
+
+const schema = {
+  type: 'object',
+  properties: {
+    body: {
+      type: 'object',
+      properties: {
+        amount: {
+          type: 'number',
+        },
+      },
+      required: ['amount'],
+    },
+  },
+  required: ['body'],
+};
 
 async function placeBid(event, context) {
   const { id } = event.pathParameters;
@@ -20,8 +37,11 @@ async function placeBid(event, context) {
   };
 
   const auction = await getAuctionById(id);
-  const highestBid = auction.highestBid.amount;
+  if (auction.status !== 'OPEN') {
+    throw new errors.Forbidden('Auction is closed');
+  }
 
+  const highestBid = auction.highestBid.amount;
   if (amount <= highestBid) {
     throw new errors.Forbidden(`Your bid must be higher than ${highestBid}`);
   }
@@ -34,4 +54,5 @@ async function placeBid(event, context) {
   };
 }
 
-export const handler = httpMiddleware(placeBid);
+export const handler = httpMiddleware(placeBid)
+  .use(validator({ inputSchema: schema }));

@@ -15,7 +15,7 @@ async function createAuction(event, context) {
   };
 
   await db.put({
-    TableName: 'AuctionsTable',
+    TableName: process.env.AUCTIONS_TABLE_NAME,
     Item: auction,
   }).promise();
 

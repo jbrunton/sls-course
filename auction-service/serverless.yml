@@ -14,8 +14,8 @@ provider:
   
 functions:
   hello:
-    handler: src/handlers/hello.handler
+    handler: src/handlers/createAuction.handler
     events:
       - http:
-          method: GET
-          path: /hello
+          method: POST
+          path: /auction

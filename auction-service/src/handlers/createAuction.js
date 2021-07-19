@@ -23,6 +23,7 @@ const schema = {
 
 async function createAuction(event, context) {
   const { title } = event.body;
+  const { principalId, email } = event.requestContext.authorizer;
   const now = new Date();
   const endDate = new Date(now);
   endDate.setHours(endDate.getHours() + 1);
@@ -35,6 +36,10 @@ async function createAuction(event, context) {
     endingAt: endDate.toISOString(),
     highestBid: {
       amount: 0,
+    },
+    seller: {
+      principalId,
+      email,
     }
   };
 

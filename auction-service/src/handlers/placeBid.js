@@ -25,13 +25,15 @@ const schema = {
 async function placeBid(event, context) {
   const { id } = event.pathParameters;
   const { amount } = event.body;
+  const { principalId, email } = event.requestContext.authorizer;
 
   const params = {
     TableName: process.env.AUCTIONS_TABLE_NAME,
     Key: { id },
-    UpdateExpression: 'set highestBid.amount = :amount',
+    UpdateExpression: 'set highestBid.amount = :amount, highestBid.bidder = :bidder',
     ExpressionAttributeValues: {
-      ':amount': amount
+      ':amount': amount,
+      ':bidder': { principalId, email },
     },
     ReturnValues: 'ALL_NEW',
   };
@@ -41,9 +43,17 @@ async function placeBid(event, context) {
     throw new errors.Forbidden('Auction is closed');
   }
 
-  const highestBid = auction.highestBid.amount;
-  if (amount <= highestBid) {
-    throw new errors.Forbidden(`Your bid must be higher than ${highestBid}`);
+  if (principalId === auction.seller.principalId) {
+    throw new errors.Forbidden("You cannot bid on your own auction");
+  }
+
+  const highestBid = auction.highestBid;
+  if (amount <= highestBid.amount) {
+    throw new errors.Forbidden(`Your bid must be higher than ${highestBid.amount}`);
+  }
+
+  if (principalId === highestBid?.bidder?.principalId) {
+    throw new errors.Forbidden("You are already the highest bidder");
   }
 
   const result = await db.update(params).promise();

@@ -4,6 +4,7 @@ service:
 plugins:
   - serverless-bundle
   - serverless-pseudo-parameters
+  - serverless-domain-manager
 
 provider:
   name: aws
@@ -64,3 +65,13 @@ custom:
   AuctionsTable:
     name: !Ref AuctionsTable
     arn: !GetAtt AuctionsTable.Arn
+  customDomain:
+    domainName: ${self:provider.stage}.sls-course.jbrunton-aws.com
+    stage: ${self:provider.stage}
+    basePath: auctions
+    certificateName: '*.sls-course.jbrunton-aws.com'
+    createRoute53Record: true
+    endpointType: 'regional'
+    securityPolicy: tls_1_2
+    apiType: rest
+    autoDomain: true

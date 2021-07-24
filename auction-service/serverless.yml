@@ -15,14 +15,18 @@ provider:
   environment:
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
     MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
+    AUCTIONS_BUCKET_NAME: ${self:custom.AuctionsBucket.name}
   iamRoleStatements:
     - ${file(roles/AuctionsTable.yml):AuctionsTable}
     - ${file(roles/MailQueue.yml):MailQueue}
+    - ${file(roles/AuctionsBucket.yml):AuctionsBucket}
 
 resources:
   Resources:
     AuctionsTable: ${file(resources/AuctionsTable.yml):AuctionsTable}
-  
+    AuctionsBucket: ${file(resources/AuctionsBucket.yml):AuctionsBucket}
+    AuctionsBucketPolicy: ${file(resources/AuctionsBucket.yml):AuctionsBucketPolicy}
+
 functions:
 
   createAuction:
@@ -57,6 +61,14 @@ functions:
           path: /auctions/{id}/bid
           authorizer: ${self:custom.authorizer}
 
+  uploadAuctionImage:
+    handler: src/handlers/uploadAuctionImage.handler
+    events:
+      - http:
+          method: PATCH
+          path: /auctions/{id}/image
+          authorizer: ${self:custom.authorizer}
+
   processAuctions:
     handler: src/handlers/processAuctions.handler
     events:
@@ -70,6 +82,8 @@ custom:
   MailQueue:
     arn: ${cf:notification-service-${self:provider.stage}.MailQueueArn}
     url: ${cf:notification-service-${self:provider.stage}.MailQueueUrl}
+  AuctionsBucket:
+    name: auctions-bucket-6e1e6801-${self:provider.stage}
   customDomain:
     domainName: ${self:provider.stage}.sls-course.jbrunton-aws.com
     stage: ${self:provider.stage}

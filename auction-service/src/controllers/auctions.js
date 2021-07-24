@@ -3,6 +3,7 @@ import AWS from 'aws-sdk';
 
 const db = new AWS.DynamoDB.DocumentClient();
 const queue = new AWS.SQS();
+const s3 = new AWS.S3();
 
 export async function getAuctionById(id) {
   const result = await db.get({
@@ -90,4 +91,29 @@ export async function closeAuction(auction) {
   }).promise();
 
   await Promise.all([notifySeller, notifyBidder]);
+}
+
+export async function uploadImage(auction, body) {
+  const key = `${auction.id}.jpg`;
+
+  const { Location } = await s3.upload({
+    Bucket: process.env.AUCTIONS_BUCKET_NAME,
+    Key: key,
+    Body: body,
+    ContentEncoding: 'base64',
+    ContentType: 'image/jpeg',
+  }).promise();
+
+  const params = {
+    TableName: process.env.AUCTIONS_TABLE_NAME,
+    Key: { id: auction.id },
+    UpdateExpression: 'set imageUrl = :imageUrl',
+    ExpressionAttributeValues: {
+      ':imageUrl': Location,
+    },
+  };
+
+  await db.update(params).promise();
+
+  return Location;
 }

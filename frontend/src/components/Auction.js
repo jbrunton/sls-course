@@ -58,7 +58,7 @@ const Auction = ({ auction, onBid, bidState }) => {
   const classes = useStyles();
   const amount = auction.highestBid.amount;
 
-  const pictureUrl = auction.pictureUrl ? auction.pictureUrl : 'placeholder.png';
+  const pictureUrl = auction.imageUrl ? auction.imageUrl : 'placeholder.png';
 
   return (
     <Card className={classes.root}>
@@ -66,7 +66,7 @@ const Auction = ({ auction, onBid, bidState }) => {
         <CardHeader
           avatar={
             <Avatar aria-label="recipe" className={classes.avatar}>
-              {auction.seller[0].toUpperCase()}
+              {auction.seller.email[0].toUpperCase()}
             </Avatar>
           }
           title={auction.title}

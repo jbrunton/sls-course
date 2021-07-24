@@ -21,7 +21,7 @@ class AuctionStore {
         }
       });
 
-      this.auctions = result.data;
+      this.auctions = result.data.auctions;
     } catch (error) {
       alert('Could not fetch auctions! Check console for more details.');
       console.error(error);
@@ -60,7 +60,7 @@ class AuctionStore {
     OverlayStore.setLoadingSpinner(true);
 
     try {
-      await axios.patch(`/auction/${id}/bid`, { amount }, {
+      await axios.patch(`/auctions/${id}/bid`, { amount }, {
         headers: {
           Authorization: AuthStore.token,
         }
@@ -81,16 +81,16 @@ class AuctionStore {
     OverlayStore.setLoadingSpinner(true);
 
     try {
-      const createAuctionResult = await axios.post('/auction', { title }, {
+      const createAuctionResult = await axios.post('/auctions', { title }, {
         headers: {
           Authorization: AuthStore.token,
         }
       });
       
-      const auction = createAuctionResult.data;
+      const auction = createAuctionResult.data.auction;
       auctionId = auction.id;
       
-      await axios.patch(`/auction/${auctionId}/picture`, pictureBase64, {
+      await axios.patch(`/auctions/${auctionId}/image`, pictureBase64, {
         headers: {
           Authorization: AuthStore.token,
         },

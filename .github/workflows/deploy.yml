@@ -1,10 +1,41 @@
+name: Deploy
+
 on:
   workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Stage'     
+        required: true
+        default: 'staging'
 
 jobs:
+
   deploy:
+  
     runs-on: ubuntu-latest
+  
     steps:
       - uses: actions/checkout@v2
-      - run: npm ci
-      - run: sls deploy
+
+      - name: Install Serverless
+        run: npm install -g serverless
+
+      - name: Deploy Auth-Service
+        run: |
+          npm ci
+          echo "$AUTH0_PRIVATE_KEY" >> secret.pem
+          sls deploy --stage ${{ github.event.inputs.stage }}
+        working-directory: auth-service
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AUTH0_PRIVATE_KEY: ${{ secrets.AUTH0_PRIVATE_KEY }}
+
+      - name: Deploy Auction-Service
+        run: |
+          npm ci
+          sls deploy --stage ${{ github.event.inputs.stage }}
+        working-directory: auction-service
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

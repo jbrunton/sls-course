@@ -2,6 +2,7 @@ import errors from 'http-errors';
 import AWS from 'aws-sdk';
 
 const db = new AWS.DynamoDB.DocumentClient();
+const queue = new AWS.SQS();
 
 export async function getAuctionById(id) {
   const result = await db.get({
@@ -52,4 +53,41 @@ export async function closeAuction(auction) {
   };
 
   await db.update(params).promise();
+
+  const { title, seller: { email: sellerEmail }, highestBid } = auction;
+
+  if (highestBid.amount === 0) {
+    await queue.sendMessage({
+      QueueUrl: process.env.MAIL_QUEUE_URL,
+      MessageBody: JSON.stringify({
+        subject: 'Your item has not been sold',
+        recipient: sellerEmail,
+        body: `Your item "${title}" had no bids and has not been sold.`,
+      }),
+    }).promise();
+
+    return;
+  }
+
+  const { amount, bidder: { email: bidderEmail } } = highestBid;
+
+  const notifySeller = queue.sendMessage({
+    QueueUrl: process.env.MAIL_QUEUE_URL,
+    MessageBody: JSON.stringify({
+      subject: 'Your item has been sold',
+      recipient: sellerEmail,
+      body: `Your item "${title}" has been sold for $${amount}.`,
+    }),
+  }).promise();
+
+  const notifyBidder = queue.sendMessage({
+    QueueUrl: process.env.MAIL_QUEUE_URL,
+    MessageBody: JSON.stringify({
+      subject: 'You won an auction',
+      recipient: bidderEmail,
+      body: `You won the auction "${title}" for $${amount}.`,
+    }),
+  }).promise();
+
+  await Promise.all([notifySeller, notifyBidder]);
 }

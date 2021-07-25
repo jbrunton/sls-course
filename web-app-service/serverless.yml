@@ -1,0 +1,36 @@
+service:
+  name: web-app-service
+
+plugins:
+  - serverless-web-app-plugin
+  - serverless-s3-cleaner
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-2
+
+resources:
+  Resources:
+    WebAppBucket: ${file(resources/WebAppBucket.yml):WebAppBucket}
+    WebAppBucketPolicy: ${file(resources/WebAppBucket.yml):WebAppBucketPolicy}
+    WebAppCloudFrontDistribution: ${file(resources/WebAppCloudFrontDistribution.yml):WebAppCloudFrontDistribution}
+    WebAppDNS: ${file(resources/WebAppDNS.yml):WebAppDNS}
+  Outputs:
+    WebAppDomainName:
+      Value: !GetAtt WebAppCloudFrontDistribution.DomainName
+
+custom:
+  api:
+    auctionsEndpoint: ${self:provider.stage}.api.sls-course.jbrunton-aws.com/auctions
+  DNS:
+    hostedZoneId: Z0065883HT3XFUWDXRA5
+  WebAppBucket:
+    name: web-app-bucket-6e1e6801-${self:provider.stage}
+    endpoint: ${self:custom.WebAppBucket.name}.s3.${self:provider.region}.amazonaws.com
+  serverless-s3-cleaner:
+    prompt: false
+    buckets:
+      - ${self:custom.WebAppBucket.name}

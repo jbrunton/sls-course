@@ -1,0 +1,6 @@
+{
+  "name": "serverless-web-app-plugin",
+  "version": "1.0.0",
+  "description": "A plugin to deploy the web app using S3 and CloudFront",
+  "author": "john_brunton@live.co.uk"
+}

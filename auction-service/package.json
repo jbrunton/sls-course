@@ -5,6 +5,7 @@
   "author": "Ariel Weinberger <ariel@codingly.io>",
   "license": "MIT",
   "devDependencies": {
+    "@middy/http-cors": "^2.4.3",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
     "babel-plugin-transform-runtime": "^6.23.0",

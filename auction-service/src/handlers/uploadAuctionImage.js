@@ -1,6 +1,7 @@
 import middy from "@middy/core";
 import errors from "http-errors";
 import validator from '@middy/validator';
+import cors from '@middy/http-cors';
 import { getAuctionById, uploadImage } from "../controllers/auctions";
 import { defaultErrorHandler, hideServerErrors } from "../middlewares/http";
 
@@ -43,5 +44,6 @@ export const handler = middy(uploadAuctionImage)
   .use([
     hideServerErrors(),
     defaultErrorHandler(),
-    validator({ inputSchema: schema })
+    validator({ inputSchema: schema }),
+    cors(),
   ]);

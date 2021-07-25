@@ -2,6 +2,7 @@ import middy from '@middy/core';
 import bodyParser from '@middy/http-json-body-parser';
 import eventNormalizer from '@middy/http-event-normalizer';
 import errorHandler from '@middy/http-error-handler';
+import cors from '@middy/http-cors';
 import errors from 'http-errors';
 
 export const hideServerErrors = () => {
@@ -27,4 +28,5 @@ export default handler => middy(handler)
     eventNormalizer(),
     hideServerErrors(),
     defaultErrorHandler(),
+    cors(),
   ]);

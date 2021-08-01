@@ -1,0 +1,13 @@
+WebAppDNS:
+  Type: AWS::Route53::RecordSetGroup
+  Properties:
+    HostedZoneId: ${self:custom.DNS.hostedZoneId}
+    RecordSets:
+      - Name: ${self:provider.stage}.app.sls-course.jbrunton-aws.com
+        Type: A
+        AliasTarget:
+          # This zone id is a constant for CloudFront distributions.
+          # See: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-aliastarget.html
+          HostedZoneId: Z2FDTNDATAQYW2
+          DNSName: !GetAtt WebAppCloudFrontDistribution.DomainName
+          EvaluateTargetHealth: false

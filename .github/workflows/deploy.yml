@@ -44,3 +44,9 @@ jobs:
           npm ci
           sls deploy --stage ${{ github.event.inputs.stage }}
         working-directory: auction-service
+
+      - name: Deploy Web-App-Service
+        run: |
+          npm ci
+          sls deploy --stage ${{ github.event.inputs.stage }}
+        working-directory: web-app-service

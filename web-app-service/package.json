@@ -46,6 +46,8 @@
   "devDependencies": {
     "customize-cra": "^0.9.1",
     "react-app-rewire-mobx": "^1.0.9",
-    "react-app-rewired": "^2.1.5"
+    "react-app-rewired": "^2.1.5",
+    "serverless-s3-cleaner": "^1.0.0",
+    "serverless-web-app-plugin": "file:./serverless-web-app-plugin"
   }
 }
